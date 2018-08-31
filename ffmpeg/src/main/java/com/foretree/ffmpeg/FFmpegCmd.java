@@ -14,7 +14,7 @@ public class FFmpegCmd {
         System.loadLibrary("swscale");
         System.loadLibrary("swresample");
         System.loadLibrary("avfilter");
-        System.loadLibrary("jxffmpegrun");
+        System.loadLibrary("ffmpegcore");
     }
 
     /**

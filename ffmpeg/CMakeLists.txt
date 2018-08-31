@@ -7,19 +7,23 @@ set(CMAKE_ANDROID_STL_TYPE ${CMAKE_ANDROID_STL_TYPE} stlport_static)
 set(PATH_LIB_SO ${CMAKE_SOURCE_DIR}/src/main/jniLibs)
 set(JNI_DIR src/main/cpp)
 
-add_library( # Sets the name of the library.
-        jxffmpegrun
+set(SRC_LIST)
+aux_source_directory(${JNI_DIR} JNI_SRC_LIST)
+aux_source_directory(${JNI_DIR}/lame LAME_SRC_LIST)
+aux_source_directory(${JNI_DIR}/jni JNI_SRC_LIST)
 
-        # Sets the library as a shared library.
-        SHARED
+list(APPEND SRC_LIST
+        ${JNI_SRC_LIST}
+        ${LAME_SRC_LIST}
+        ${JNI_SRC_LIST}
+)
 
-        # Provides a relative path to your source file(s).
-        src/main/cpp/cmdutils.c
-        src/main/cpp/ffmpeg.c
-        src/main/cpp/ffmpeg_filter.c
-        src/main/cpp/ffmpeg_opt.c
-        src/main/cpp/jx_ffmpeg_cmd_run.c
-        )
+add_library(ffmpegcore SHARED ${SRC_LIST})
+# mp3lame single lib
+add_library(mp3core SHARED
+        ${JNI_DIR}/jni/jni_mp3_encode.cpp
+        ${JNI_DIR}/lame/mp3_encoder.cpp)
+
 add_library(avcodec SHARED IMPORTED)
 add_library(avfilter SHARED IMPORTED)
 add_library(avformat SHARED IMPORTED)
@@ -27,6 +31,13 @@ add_library(avutil SHARED IMPORTED)
 add_library(swresample SHARED IMPORTED)
 add_library(swscale SHARED IMPORTED)
 add_library(fdk-aac SHARED IMPORTED)
+
+add_library(mp3lame SHARED IMPORTED)
+set_target_properties(
+        mp3lame
+        PROPERTIES IMPORTED_LOCATION
+        ${PATH_LIB_SO}/${ANDROID_ABI}/libmp3lame.so
+)
 
 set_target_properties(
         avcodec
@@ -64,7 +75,6 @@ set_target_properties(
         ${PATH_LIB_SO}/${ANDROID_ABI}/libswscale.so
 )
 
-
 set_target_properties(
         fdk-aac
         PROPERTIES IMPORTED_LOCATION
@@ -76,8 +86,6 @@ include_directories(
         ffmpeg-3.2.5
 )
 
-find_library(log-lib log)
-
 set(LIBS)
 list(APPEND LIBS
         fdk-aac
@@ -87,6 +95,15 @@ list(APPEND LIBS
         avutil
         swresample
         swscale
+        mp3lame
+        jnigraphics
         log)
 
-target_link_libraries(jxffmpegrun ${LIBS})
+set(MP3_LIBS)
+list(APPEND MP3_LIBS
+        mp3lame
+        jnigraphics
+        log)
+
+target_link_libraries(ffmpegcore ${LIBS})
+target_link_libraries(mp3core ${MP3_LIBS})

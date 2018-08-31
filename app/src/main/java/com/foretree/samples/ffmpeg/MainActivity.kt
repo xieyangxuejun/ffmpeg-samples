@@ -3,6 +3,7 @@ package com.foretree.samples.ffmpeg
 import android.os.Bundle
 import android.support.v7.app.AppCompatActivity
 import com.foretree.ffmpeg.FFmpegCmd
+import com.foretree.ffmpeg.Mp3Encoder
 import kotlinx.android.synthetic.main.activity_main.*
 
 class MainActivity : AppCompatActivity() {
@@ -11,6 +12,10 @@ class MainActivity : AppCompatActivity() {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
         tv.text = FFmpegCmd.getFFmpegConfig()
+
+        Mp3Encoder().run {
+            init("", 2, 128, 4100, "")
+        }
     }
 
     /**
